@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-verde: #2E7D32;
+  --color-verde-claro: #E8F5E9;
+  --color-tierra-oscuro: #5D4037;
+  --color-tierra-claro: #D7CCC8;
+  --color-texto: #3E2723;
+}
+
+body {
+  color: var(--color-texto);
+  background-color: #FAF8F5;
+}
+
+.transicion-suave {
+  transition: all 0.25s ease-in-out;
+}

@@ -1,0 +1,91 @@
+// Esquema de base de datos - Mueble Vivo
+// Ejecutar: npx prisma db push  (Supabase Postgres, plan gratuito)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")   // Pooler de Supabase (pgbouncer, puerto 6543)
+  directUrl = env("DIRECT_URL")     // Conexión directa (puerto 5432), usada por prisma db push
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  CANCELLED
+  FAILED
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String
+  price       Int      // CLP, entero (sin decimales)
+  stock       Int      @default(0)
+  images      Json     @default("[]") // array de URLs (Cloudinary)
+  salesCount  Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems  OrderItem[]
+
+  @@index([createdAt])
+  @@index([salesCount])
+}
+
+model Order {
+  id               String      @id @default(cuid())
+  customerName     String
+  customerEmail    String
+  customerPhone    String      // obligatorio, incluye código de país (+56...)
+  shippingAddress  String
+  shippingLat      Float
+  shippingLng      Float
+  totalAmount      Int
+  status           OrderStatus @default(PENDING)
+  buyOrder         String      @unique // identificador único enviado a Transbank
+  sessionId        String
+  transactionToken String?     // token retornado por Webpay (create)
+  transactionId    String?     // authorizationCode / detalle tras commit
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  items OrderItem[]
+
+  @@index([status])
+  @@index([buyOrder])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  unitPrice Int
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model Admin {
+  id             String    @id @default(cuid())
+  username       String    @unique
+  passwordHash   String
+  failedAttempts Int       @default(0)
+  lockedUntil    DateTime?
+  createdAt      DateTime  @default(now())
+}
+
+// Registro de eventos de seguridad (sin datos sensibles)
+model SecurityLog {
+  id        String   @id @default(cuid())
+  event     String   // ej: "LOGIN_FAILED", "LOGIN_SUCCESS", "ORDER_STATUS_CHANGED"
+  ip        String?
+  detail    String?  // texto genérico, nunca contraseñas/tokens
+  createdAt DateTime @default(now())
+}
