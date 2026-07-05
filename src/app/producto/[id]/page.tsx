@@ -45,11 +45,10 @@ export default async function ProductoPage({ params }: { params: { id: string } 
   };
 
   const clp = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
-  const nonce = (await headers()).get('x-nonce') ?? undefined;
 
-  return (
-    <main className="max-w-5xl mx-auto px-4 py-8 grid sm:grid-cols-2 gap-8">
-      <script type="application/ld+json" nonce={nonce} dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+    return (
+      <main className="max-w-5xl mx-auto px-4 py-8 grid sm:grid-cols-2 gap-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <div className="aspect-square bg-verde-claro rounded-xl overflow-hidden">
         {images[0] && <img src={images[0]} alt={producto.name} className="w-full h-full object-cover" />}
