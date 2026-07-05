@@ -1,3 +1,5 @@
+import { Instagram, Facebook } from 'lucide-react';
+
 export default function Footer() {
   return (
     <footer id="contacto" className="bg-tierra-oscuro text-white mt-16">
@@ -14,8 +16,14 @@ export default function Footer() {
         <div>
           <h4 className="font-semibold mb-2">Síguenos</h4>
           <div className="flex gap-4 text-sm text-tierra-claro">
-            <a href="#" className="hover:text-white transicion-suave">Instagram</a>
-            <a href="#" className="hover:text-white transicion-suave">Facebook</a>
+            <div className="flex gap-4">
+              <a href="#" aria-label="Instagram" className="text-tierra-claro hover:text-white transicion-suave">
+                <Instagram size={22} />
+              </a>
+              <a href="#" aria-label="Facebook" className="text-tierra-claro hover:text-white transicion-suave">
+                <Facebook size={22} />
+              </a>
+            </div>
           </div>
         </div>
       </div>
