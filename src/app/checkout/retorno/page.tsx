@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/store/cart';
@@ -12,7 +12,7 @@ const mensajes: Record<string, { titulo: string; texto: string; color: string }>
   error: { titulo: 'Ocurrió un error', texto: 'No pudimos verificar tu pago. Contáctanos si el problema persiste.', color: 'text-red-600' },
 };
 
-export default function RetornoPage() {
+function RetornoContenido() {
   const searchParams = useSearchParams();
   const estado = searchParams.get('estado') || 'error';
   const orden = searchParams.get('orden');
@@ -32,5 +32,13 @@ export default function RetornoPage() {
         Volver a la tienda
       </Link>
     </main>
+  );
+}
+
+export default function RetornoPage() {
+  return (
+    <Suspense fallback={<main className="max-w-lg mx-auto px-4 py-20 text-center">Cargando...</main>}>
+      <RetornoContenido />
+    </Suspense>
   );
 }
