@@ -1,12 +1,14 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
-import { headers } from 'next/headers';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import AgregarAlCarrito from '@/components/AgregarAlCarrito';
 
 async function getProducto(slug: string) {
   return prisma.product.findUnique({ where: { slug } });
 }
+
+export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const producto = await getProducto(params.id);
@@ -46,12 +48,21 @@ export default async function ProductoPage({ params }: { params: { id: string } 
 
   const clp = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
 
-    return (
-      <main className="max-w-5xl mx-auto px-4 py-8 grid sm:grid-cols-2 gap-8">
+  return (
+    <main className="max-w-5xl mx-auto px-4 py-8 grid sm:grid-cols-2 gap-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <div className="aspect-square bg-verde-claro rounded-xl overflow-hidden">
-        {images[0] && <img src={images[0]} alt={producto.name} className="w-full h-full object-cover" />}
+      <div className="aspect-square bg-verde-claro rounded-xl overflow-hidden relative">
+        {images[0] && (
+          <Image
+            src={images[0]}
+            alt={producto.name}
+            fill
+            priority
+            sizes="(max-width: 640px) 100vw, 50vw"
+            className="object-cover"
+          />
+        )}
       </div>
 
       <div>

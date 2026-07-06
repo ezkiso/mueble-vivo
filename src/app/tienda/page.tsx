@@ -10,6 +10,7 @@ const sortMap: Record<string, any> = {
 };
 
 export const metadata = { title: 'Tienda' };
+export const revalidate = 60;
 
 export default async function TiendaPage({ searchParams }: { searchParams: { sort?: string; page?: string } }) {
   const sort = sortMap[searchParams.sort || 'recientes'] ? searchParams.sort! : 'recientes';

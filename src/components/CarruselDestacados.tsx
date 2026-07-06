@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Producto {
   id: string;
@@ -27,9 +28,16 @@ export default function CarruselDestacados({ productos }: { productos: Producto[
 
   return (
     <div className="relative w-full h-80 sm:h-96 rounded-2xl overflow-hidden bg-verde-claro">
-      <Link href={`/producto/${actual.slug}`} className="block w-full h-full">
+      <Link href={`/producto/${actual.slug}`} className="block w-full h-full relative">
         {actual.images?.[0] && (
-          <img src={actual.images[0]} alt={actual.name} className="w-full h-full object-cover transicion-suave" />
+          <Image
+            src={actual.images[0]}
+            alt={actual.name}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover transicion-suave"
+          />
         )}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6 text-white">
           <h3 className="font-titulo text-2xl">{actual.name}</h3>

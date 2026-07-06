@@ -22,9 +22,20 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Mueble Vivo',
+    url: baseUrl,
+    description: 'Terrarios artesanales hechos a mano en Chile.',
+  };
+
   return (
     <html lang="es-CL">
       <body className={`${lora.variable} ${nunito.variable} font-cuerpo bg-[#FAF8F5] text-texto`}>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <Header />
         {children}
         <Footer />

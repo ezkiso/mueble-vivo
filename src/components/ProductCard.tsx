@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 const clp = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
 
@@ -6,9 +7,15 @@ export default function ProductCard({ product }: { product: { id: string; name: 
   return (
     <div className="bg-white rounded-xl border border-tierra-claro overflow-hidden group">
       <Link href={`/producto/${product.slug}`}>
-        <div className="aspect-square bg-verde-claro overflow-hidden">
+        <div className="aspect-square bg-verde-claro overflow-hidden relative">
           {product.images?.[0] && (
-            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transicion-suave" />
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              sizes="(max-width: 640px) 50vw, 25vw"
+              className="object-cover group-hover:scale-105 transicion-suave"
+            />
           )}
         </div>
       </Link>
