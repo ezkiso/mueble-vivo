@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description: 'Diseña tu propio terrario: elige el jarro, el sustrato, las plantas y la decoración. Cotización a medida.',
 };
 
-const NUMERO_WHATSAPP = '56912345678';
+const NUMERO_WHATSAPP = '56927202356';
 
 const pasos = [
     { icono: FlaskConical, titulo: 'Elige el jarro', texto: 'Distintas formas y tamaños de vidrio, desde compactos hasta grandes piezas de exhibición.' },
