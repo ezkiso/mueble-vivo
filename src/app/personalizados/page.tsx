@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Layers, Sprout, Mountain, FlaskConical } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
+import GaleriaPersonalizados from '@/components/GaleriaPersonalizados';
 
 export const dynamic = 'force-dynamic'; // siempre trae datos frescos (sin caché de ISR)
 
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
     description: 'Diseña tu propio terrario: elige el jarro, el sustrato, las plantas y la decoración. Cotización a medida.',
 };
 
-const NUMERO_WHATSAPP = '56927202356';
+const NUMERO_WHATSAPP = '56927202356'; 
 
 const pasos = [
     { icono: FlaskConical, titulo: 'Elige el jarro', texto: 'Distintas formas y tamaños de vidrio, desde compactos hasta grandes piezas de exhibición.' },
@@ -28,6 +29,7 @@ export default async function PersonalizadosPage() {
 
     return (
         <main className="max-w-5xl mx-auto px-4 py-12 space-y-16">
+        {/* Hero */}
         <section className="text-center max-w-2xl mx-auto">
             <span className="inline-block bg-verde text-white text-xs font-semibold px-3 py-1 rounded-full mb-4">
             SERVICIO EXCLUSIVO
@@ -47,6 +49,7 @@ export default async function PersonalizadosPage() {
             </a>
         </section>
 
+        {/* Cómo funciona */}
         <section>
             <h2 className="font-titulo text-2xl text-tierra-oscuro mb-6 text-center">Cómo funciona</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -63,25 +66,13 @@ export default async function PersonalizadosPage() {
             </div>
         </section>
 
-        {/* Galería de ejemplos: tira horizontal con scroll, sin límite de imágenes */}
+        {/* Galería de ejemplos: auto-scroll cada 4s, 3 imágenes visibles */}
         <section>
             <h2 className="font-titulo text-2xl text-tierra-oscuro mb-6 text-center">Algunos que ya hicimos</h2>
-            {ejemplos.length === 0 ? (
-            <p className="text-center text-gray-400 text-sm">Pronto compartiremos fotos de nuestros trabajos.</p>
-            ) : (
-            <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-4 px-4">
-                {ejemplos.map((ej) => (
-                <div
-                    key={ej.id}
-                    className="w-64 shrink-0 snap-start aspect-square bg-verde-claro rounded-xl overflow-hidden"
-                >
-                    <img src={ej.imageUrl} alt={ej.description} className="w-full h-full object-cover" />
-                </div>
-                ))}
-            </div>
-            )}
+            <GaleriaPersonalizados ejemplos={ejemplos} />
         </section>
 
+        {/* CTA final */}
         <section className="bg-tierra-oscuro text-white rounded-2xl p-8 text-center">
             <h2 className="font-titulo text-2xl mb-3">¿Listo para armar el tuyo?</h2>
             <p className="text-tierra-claro mb-6">Cuéntanos tu idea y te enviamos una cotización sin compromiso.</p>
