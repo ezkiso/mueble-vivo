@@ -17,6 +17,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'es_CL',
     siteName: 'Mueble Vivo',
+    images: ['/og-default.jpg'],
   },
   robots: { index: true, follow: true },
 };

@@ -5,12 +5,21 @@ import GaleriaPersonalizados from '@/components/GaleriaPersonalizados';
 
 export const dynamic = 'force-dynamic'; // siempre trae datos frescos (sin caché de ISR)
 
-export const metadata: Metadata = {
-    title: 'Terrarios Personalizados',
-    description: 'Diseña tu propio terrario: elige el jarro, el sustrato, las plantas y la decoración. Cotización a medida.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const primerEjemplo = await prisma.ejemploPersonalizado.findFirst({ orderBy: { orden: 'asc' } });
 
-const NUMERO_WHATSAPP = '56927202356'; 
+    return {
+        title: 'Terrarios Personalizados',
+        description: 'Diseña tu propio terrario: elige el jarro, el sustrato, las plantas y la decoración. Cotización a medida.',
+        openGraph: {
+        title: 'Terrarios Personalizados | Mueble Vivo',
+        description: 'Elige el jarro, el sustrato, las plantas y la decoración. Cotización a medida.',
+        images: primerEjemplo ? [primerEjemplo.imageUrl] : [],
+        },
+    };
+}
+
+const NUMERO_WHATSAPP = '56912345678'; // mismo número que BotonWhatsapp.tsx y TerrariosPersonalizados.tsx
 
 const pasos = [
     { icono: FlaskConical, titulo: 'Elige el jarro', texto: 'Distintas formas y tamaños de vidrio, desde compactos hasta grandes piezas de exhibición.' },
