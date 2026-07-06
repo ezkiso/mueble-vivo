@@ -4,6 +4,7 @@ import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
+import BotonWhatsapp from '@/components/BotonWhatsapp';
 
 const lora = Lora({ subsets: ['latin'], variable: '--font-lora', display: 'swap' });
 const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito', display: 'swap' });
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <Footer />
         <CartDrawer />
+        <BotonWhatsapp />
       </body>
     </html>
   );

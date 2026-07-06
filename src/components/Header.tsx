@@ -23,6 +23,12 @@ export default function Header() {
         <nav className="hidden sm:flex items-center gap-6 font-cuerpo text-sm">
           <Link href="/" className="hover:text-verde transicion-suave">Inicio</Link>
           <Link href="/tienda" className="hover:text-verde transicion-suave">Tienda</Link>
+          <Link
+            href="/personalizados"
+            className="bg-verde-claro text-verde border border-verde/30 px-3 py-1 rounded-full font-semibold hover:bg-verde hover:text-white transicion-suave"
+          >
+            🌿 Personalizados
+          </Link>
           <Link href="/#contacto" className="hover:text-verde transicion-suave">Contacto</Link>
         </nav>
 

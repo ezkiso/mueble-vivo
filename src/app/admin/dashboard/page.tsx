@@ -17,6 +17,7 @@ export default async function DashboardPage() {
         <nav className="flex gap-4 text-sm">
           <Link href="/admin/productos" className="underline">Productos</Link>
           <Link href="/admin/ordenes" className="underline">Órdenes</Link>
+          <Link href="/admin/personalizados" className="underline">Galería Personalizados</Link>
         </nav>
       </div>
 

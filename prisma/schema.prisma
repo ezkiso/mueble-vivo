@@ -89,3 +89,12 @@ model SecurityLog {
   detail    String?  // texto genérico, nunca contraseñas/tokens
   createdAt DateTime @default(now())
 }
+
+// Fotos de ejemplo para la página /personalizados (terrarios ya vendidos, subidas desde /admin)
+model EjemploPersonalizado {
+  id          String   @id @default(cuid())
+  imageUrl    String
+  description String
+  orden       Int      @default(0)
+  createdAt   DateTime @default(now())
+}

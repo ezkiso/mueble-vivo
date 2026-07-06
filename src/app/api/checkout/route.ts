@@ -84,6 +84,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ token: wpResponse.token, url: wpResponse.url });
   } catch (err) {
+    console.error('Error creando transacción Webpay:', err); // línea nueva
     await prisma.order.update({ where: { id: order.id }, data: { status: 'FAILED' } });
     return NextResponse.json({ error: 'No fue posible iniciar el pago. Intenta nuevamente.' }, { status: 502 });
   }
