@@ -19,7 +19,10 @@ export default function AdminLoginPage() {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        username: form.username.trim(),
+        password: form.password.trim(),
+      }),
     });
 
     const data = await res.json();
@@ -41,10 +44,19 @@ export default function AdminLoginPage() {
       <form onSubmit={onSubmit} className="space-y-4">
         <input required placeholder="Usuario" value={form.username}
           onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
+          autoCapitalize="none"
+          autoCorrect="off"
+          autoComplete="username"
+          spellCheck={false}
           className="w-full border border-tierra-claro rounded-lg px-4 py-2.5" />
+
         <div className="relative">
           <input required type={mostrarPassword ? 'text' : 'password'} placeholder="Contraseña" value={form.password}
             onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+            autoCapitalize="none"
+            autoCorrect="off"
+            autoComplete="current-password"
+            spellCheck={false}
             className="w-full border border-tierra-claro rounded-lg px-4 py-2.5 pr-10" />
           <button
             type="button"
@@ -55,6 +67,7 @@ export default function AdminLoginPage() {
             {mostrarPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
+
         <button disabled={loading} className="w-full bg-verde text-white py-2.5 rounded-lg font-semibold disabled:opacity-50">
           {loading ? 'Ingresando...' : 'Ingresar'}
         </button>

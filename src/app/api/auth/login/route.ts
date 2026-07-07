@@ -20,11 +20,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
 
-  const { username, password } = parsed.data;
+  // Trim defensivo también en el backend: nunca confiar en que el frontend
+  // ya limpió espacios (teclados móviles a veces agregan espacios invisibles).
+  const username = parsed.data.username.trim();
+  const password = parsed.data.password.trim();
 
   const admin = await prisma.admin.findUnique({ where: { username } });
 
-  // Respuesta genérica siempre, para no filtrar si el usuario existe o no.
   const genericError = () => NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
 
   if (!admin) {
