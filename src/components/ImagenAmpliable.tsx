@@ -22,7 +22,7 @@ export default function ImagenAmpliable({ src, alt, sizes, priority }: Props) {
             aria-label={`Ampliar imagen: ${alt}`}
             className="relative block w-full h-full cursor-zoom-in"
         >
-            <Image src={src} alt={alt} fill priority={priority} sizes={sizes} className="object-cover" />
+            <Image src={src} alt={alt} fill priority={priority} sizes={sizes} className="object-contain" />
         </button>
 
         {abierta && (

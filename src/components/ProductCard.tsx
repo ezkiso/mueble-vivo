@@ -14,7 +14,7 @@ export default function ProductCard({ product }: { product: { id: string; name: 
               alt={product.name}
               fill
               sizes="(max-width: 640px) 50vw, 25vw"
-              className="object-cover group-hover:scale-105 transicion-suave"
+              className="object-contain group-hover:scale-105 transicion-suave"
             />
           )}
         </div>

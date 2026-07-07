@@ -36,7 +36,7 @@ export default function CarruselDestacados({ productos }: { productos: Producto[
             fill
             priority
             sizes="100vw"
-            className="object-cover transicion-suave"
+            className="object-contain transicion-suave"
           />
         )}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6 text-white">
