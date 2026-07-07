@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAdminSession } from '@/lib/useAdminSession';
 
 interface Producto {
-  id: string; name: string; description: string; price: number; stock: number; images: string[];
+  id: string; name: string; description: string; price: number; stock: number; images: string[]; sold: boolean;
 }
 
 const clp = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
@@ -16,7 +16,7 @@ export default function AdminProductosPage() {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [q, setQ] = useState('');
   const [editando, setEditando] = useState<Producto | null>(null);
-  const [form, setForm] = useState({ name: '', description: '', price: '', stock: '', images: [] as string[] });
+  const [form, setForm] = useState({ name: '', description: '', price: '', stock: '', images: [] as string[], sold: false });
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +30,7 @@ export default function AdminProductosPage() {
 
   function resetForm() {
     setEditando(null);
-    setForm({ name: '', description: '', price: '', stock: '', images: [] });
+    setForm({ name: '', description: '', price: '', stock: '', images: [], sold: false });
   }
 
   async function subirImagen(file: File) {
@@ -90,6 +90,7 @@ export default function AdminProductosPage() {
       price: Number(form.price),
       stock: Number(form.stock),
       images: form.images,
+      sold: form.sold,
     };
 
     const url = editando ? `/api/admin/products/${editando.id}` : '/api/admin/products';
@@ -119,7 +120,7 @@ export default function AdminProductosPage() {
 
   function editar(p: Producto) {
     setEditando(p);
-    setForm({ name: p.name, description: p.description, price: String(p.price), stock: String(p.stock), images: p.images });
+    setForm({ name: p.name, description: p.description, price: String(p.price), stock: String(p.stock), images: p.images, sold: p.sold });
   }
 
   return (
@@ -150,6 +151,14 @@ export default function AdminProductosPage() {
           <button className="bg-verde text-white px-4 py-2 rounded-lg">{editando ? 'Guardar cambios' : 'Crear producto'}</button>
           {editando && <button type="button" onClick={resetForm} className="px-4 py-2 border rounded-lg">Cancelar</button>}
         </div>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={form.sold}
+            onChange={(e) => setForm((f) => ({ ...f, sold: e.target.checked }))}
+          />
+          Marcar como vendido (queda visible en la tienda como ejemplo, no comprable)
+        </label>
       </form>
 
       <input placeholder="Buscar producto..." value={q} onChange={(e) => setQ(e.target.value)}

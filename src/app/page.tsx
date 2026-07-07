@@ -10,7 +10,7 @@ async function getDestacados() {
     where: { active: true },
     orderBy: hasSales ? { salesCount: 'desc' } : { createdAt: 'desc' },
     take: 5,
-    select: { id: true, name: true, slug: true, price: true, images: true },
+    select: { id: true, name: true, slug: true, price: true, images: true, stock: true, sold: true },
   });
 }
 
@@ -19,7 +19,7 @@ async function getRecientes() {
     where: { active: true },
     orderBy: { createdAt: 'desc' },
     take: 8,
-    select: { id: true, name: true, slug: true, price: true, images: true, stock: true },
+    select: { id: true, name: true, slug: true, price: true, images: true, stock: true, sold: true },
   });
 }
 

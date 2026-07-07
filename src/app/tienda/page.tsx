@@ -23,7 +23,7 @@ export default async function TiendaPage({ searchParams }: { searchParams: { sor
       orderBy: sortMap[sort],
       take: perPage,
       skip: (page - 1) * perPage,
-      select: { id: true, name: true, slug: true, price: true, images: true, stock: true },
+      select: { id: true, name: true, slug: true, price: true, images: true, stock: true, sold: true },
     }),
     prisma.product.count({ where: { active: true } }),
   ]);

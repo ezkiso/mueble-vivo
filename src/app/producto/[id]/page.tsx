@@ -65,12 +65,23 @@ export default async function ProductoPage({ params }: { params: { id: string } 
 
       <div>
         <h1 className="font-titulo text-3xl text-tierra-oscuro mb-2">{producto.name}</h1>
-        <p className="text-2xl text-verde font-semibold mb-4">{clp.format(producto.price)}</p>
+        <p className="text-2xl text-verde font-semibold mb-4">
+          {clp.format(producto.price)}
+          {producto.sold && (
+            <span className="text-tierra-oscuro text-base font-semibold ml-3">Vendido</span>
+          )}
+          {!producto.sold && producto.stock === 0 && (
+            <span className="text-red-500 text-base font-semibold ml-3">Agotado</span>
+          )}
+        </p>
         <p className="text-sm text-gray-700 mb-6 whitespace-pre-line">{producto.description}</p>
 
-        {producto.stock === 0 ? (
-          <p className="text-red-500 font-semibold">Agotado</p>
-        ) : (
+        {producto.sold ? (
+          <div className="bg-tierra-claro/40 border border-tierra-claro rounded-lg p-4">
+            <p className="text-tierra-oscuro font-semibold mb-1">🌿 Este terrario ya fue vendido</p>
+            <p className="text-sm text-gray-600">Lo dejamos aquí como ejemplo de nuestro trabajo. ¿Quieres uno similar? Contáctanos.</p>
+          </div>
+        ) : producto.stock === 0 ? null : (
           <AgregarAlCarrito
             product={{ id: producto.id, name: producto.name, price: producto.price, image: images[0] ?? null, stock: producto.stock }}
           />

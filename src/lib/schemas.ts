@@ -14,6 +14,7 @@ export const productSchema = z.object({
   stock: z.number().int().min(0).max(100_000),
   images: z.array(z.string().url()).max(8),
   active: z.boolean().optional().default(true),
+  sold: z.boolean().optional().default(false),
 });
 
 export const paginationSchema = z.object({

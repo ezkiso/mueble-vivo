@@ -30,6 +30,9 @@ export async function POST(req: NextRequest) {
     if (!product) {
       return NextResponse.json({ error: `Producto no disponible: ${item.productId}` }, { status: 409 });
     }
+    if (product.sold) {
+      return NextResponse.json({ error: `"${product.name}" ya fue vendido y no está disponible para compra` }, { status: 409 });
+    }
     if (product.stock < item.quantity) {
       return NextResponse.json({ error: `Sin stock suficiente para "${product.name}"` }, { status: 409 });
     }

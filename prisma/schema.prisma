@@ -29,6 +29,7 @@ model Product {
   images      Json     @default("[]") // array de URLs (Cloudinary)
   salesCount  Int      @default(0)
   active      Boolean  @default(true)
+  sold        Boolean  @default(false) // marcado manualmente como "vendido, se muestra como ejemplo"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
