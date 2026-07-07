@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 }
 
-const NUMERO_WHATSAPP = '56912345678'; // mismo número que BotonWhatsapp.tsx y TerrariosPersonalizados.tsx
+const NUMERO_WHATSAPP = '56927202356'; // mismo número que BotonWhatsapp.tsx y TerrariosPersonalizados.tsx
 
 const pasos = [
     { icono: FlaskConical, titulo: 'Elige el jarro', texto: 'Distintas formas y tamaños de vidrio, desde compactos hasta grandes piezas de exhibición.' },

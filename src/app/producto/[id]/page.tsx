@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import Image from 'next/image';
+import ImagenAmpliable from '@/components/ImagenAmpliable';
 import AgregarAlCarrito from '@/components/AgregarAlCarrito';
 
 async function getProducto(slug: string) {
@@ -54,13 +54,11 @@ export default async function ProductoPage({ params }: { params: { id: string } 
 
       <div className="aspect-square bg-verde-claro rounded-xl overflow-hidden relative">
         {images[0] && (
-          <Image
+          <ImagenAmpliable
             src={images[0]}
             alt={producto.name}
-            fill
             priority
             sizes="(max-width: 640px) 100vw, 50vw"
-            className="object-cover"
           />
         )}
       </div>

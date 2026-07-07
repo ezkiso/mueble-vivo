@@ -2,13 +2,9 @@
 
 const isDev = process.env.NODE_ENV !== 'production';
 
-// Next.js App Router genera scripts inline para su propia hidratación (fuera de
-// nuestro control), por eso script-src necesita 'unsafe-inline'. Se compensa
-// restringiendo todo lo demás: sin dominios externos de script, sin eval en
-// producción, y CSRF + Zod + JWT httpOnly cubriendo la superficie de ataque real.
 const csp = [
   "default-src 'self'",
-  "img-src 'self' res.cloudinary.com data: https://*.tile.openstreetmap.org",
+  "img-src 'self' res.cloudinary.com data: blob: https://*.tile.openstreetmap.org",
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self' 'unsafe-inline'" + (isDev ? " 'unsafe-eval'" : ''),
   "font-src 'self' data:",

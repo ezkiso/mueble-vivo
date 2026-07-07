@@ -1,3 +1,4 @@
+// src/app/api/admin/ejemplos/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { validateCsrf } from '@/lib/csrf';
@@ -9,4 +10,4 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     await prisma.ejemploPersonalizado.delete({ where: { id: params.id } }).catch(() => null);
     return NextResponse.json({ ok: true });
-}
+    }

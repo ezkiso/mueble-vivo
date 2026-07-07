@@ -1,6 +1,7 @@
+// src/app/admin/personalizados/page.tsx
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useAdminSession } from '@/lib/useAdminSession';
 
 interface Ejemplo {
@@ -16,6 +17,9 @@ const MAX_SIZE = 5 * 1024 * 1024;
 export default function AdminPersonalizadosPage() {
     const { csrfToken } = useAdminSession();
     const [ejemplos, setEjemplos] = useState<Ejemplo[]>([]);
+
+    const [archivo, setArchivo] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [description, setDescription] = useState('');
     const [subiendo, setSubiendo] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -38,7 +42,7 @@ export default function AdminPersonalizadosPage() {
 
     useEffect(() => { cargar(); }, []);
 
-    async function subirImagen(file: File) {
+    function elegirArchivo(file: File) {
         setError(null);
 
         if (!ALLOWED.includes(file.type)) {
@@ -49,10 +53,23 @@ export default function AdminPersonalizadosPage() {
         setError('La imagen supera los 5 MB.');
         return;
         }
-        if (!description.trim()) {
-        setError('Escribe una descripción antes de subir la foto.');
-        return;
-        }
+
+        setArchivo(file);
+        setPreviewUrl(URL.createObjectURL(file));
+    }
+
+    function cancelarSeleccion() {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        setArchivo(null);
+        setPreviewUrl(null);
+        setDescription('');
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+
+    async function confirmarSubida() {
+        if (!archivo) return;
+        setError(null);
+
         if (!csrfToken) {
         setError('Sesión no lista todavía, espera un segundo e intenta de nuevo.');
         return;
@@ -68,7 +85,7 @@ export default function AdminPersonalizadosPage() {
         const sig = await sigRes.json();
 
         const body = new FormData();
-        body.append('file', file);
+        body.append('file', archivo);
         body.append('api_key', sig.apiKey);
         body.append('timestamp', sig.timestamp);
         body.append('signature', sig.signature);
@@ -95,8 +112,7 @@ export default function AdminPersonalizadosPage() {
             throw new Error(data.error || 'No fue posible guardar el ejemplo en la base de datos.');
         }
 
-        setDescription('');
-        if (fileInputRef.current) fileInputRef.current.value = '';
+        cancelarSeleccion();
         await cargar();
         } catch (e) {
         console.error('Error subiendo imagen:', e);
@@ -122,29 +138,56 @@ export default function AdminPersonalizadosPage() {
         <div className="bg-white border border-tierra-claro rounded-xl p-5 mb-8 space-y-3">
             {error && <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded p-2">{error}</p>}
 
-            <input
-            placeholder="Descripción (ej: Terrario grande con helechos y madera flotante)"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full border border-tierra-claro rounded-lg px-3 py-2"
-            />
+            {!archivo ? (
+            <>
+                <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => e.target.files?.[0] && elegirArchivo(e.target.files[0])}
+                />
+                <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full bg-verde text-white py-2.5 rounded-lg font-semibold hover:bg-verde/90 transicion-suave"
+                >
+                📷 Elegir foto de terrario vendido
+                </button>
+            </>
+            ) : (
+            <>
+                <div className="w-32 h-32 mx-auto rounded-lg overflow-hidden bg-verde-claro">
+                <img src={previewUrl!} alt="Vista previa" className="w-full h-full object-cover" />
+                </div>
 
-            <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={(e) => e.target.files?.[0] && subirImagen(e.target.files[0])}
-            />
+                <input
+                placeholder="Título (opcional)"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full border border-tierra-claro rounded-lg px-3 py-2"
+                />
 
-            <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={subiendo}
-            className="w-full bg-verde text-white py-2.5 rounded-lg font-semibold disabled:opacity-50 hover:bg-verde/90 transicion-suave"
-            >
-            {subiendo ? 'Subiendo...' : '📷 Subir foto de terrario vendido'}
-            </button>
+                <div className="flex gap-2">
+                <button
+                    type="button"
+                    onClick={confirmarSubida}
+                    disabled={subiendo}
+                    className="flex-1 bg-verde text-white py-2.5 rounded-lg font-semibold disabled:opacity-50 hover:bg-verde/90 transicion-suave"
+                >
+                    {subiendo ? 'Subiendo...' : '✓ Subir foto'}
+                </button>
+                <button
+                    type="button"
+                    onClick={cancelarSeleccion}
+                    disabled={subiendo}
+                    className="px-4 py-2.5 border border-tierra-claro rounded-lg disabled:opacity-50"
+                >
+                    Cancelar
+                </button>
+                </div>
+            </>
+            )}
         </div>
 
         <div className="flex flex-col gap-3">
@@ -154,10 +197,10 @@ export default function AdminPersonalizadosPage() {
             {ejemplos.map((ej) => (
             <div key={ej.id} className="bg-white border border-tierra-claro rounded-xl overflow-hidden flex gap-4 p-3">
                 <div className="w-24 h-24 bg-verde-claro rounded-lg overflow-hidden shrink-0">
-                <img src={ej.imageUrl} alt={ej.description} className="w-full h-full object-cover" />
+                <img src={ej.imageUrl} alt={ej.description || 'Terrario personalizado'} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 flex flex-col justify-between">
-                <p className="text-sm text-gray-700">{ej.description}</p>
+                <p className="text-sm text-gray-700">{ej.description || <span className="text-gray-400 italic">Sin título</span>}</p>
                 <button onClick={() => eliminar(ej.id)} className="text-red-500 text-xs underline self-start">Eliminar</button>
                 </div>
             </div>

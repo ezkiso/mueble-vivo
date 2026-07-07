@@ -1,3 +1,4 @@
+// src/app/api/admin/ejemplos/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
@@ -5,7 +6,7 @@ import { validateCsrf } from '@/lib/csrf';
 
 const ejemploSchema = z.object({
     imageUrl: z.string().url(),
-    description: z.string().min(3).max(200),
+    description: z.string().max(200).optional().default(''),
     orden: z.number().int().min(0).max(1000).optional().default(0),
 });
 
@@ -27,4 +28,4 @@ export async function POST(req: NextRequest) {
 
     const ejemplo = await prisma.ejemploPersonalizado.create({ data: parsed.data });
     return NextResponse.json(ejemplo, { status: 201 });
-}
+    }

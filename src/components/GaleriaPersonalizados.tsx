@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import ImagenAmpliable from '@/components/ImagenAmpliable';
 
 interface Ejemplo {
     id: string;
@@ -13,7 +14,7 @@ export default function GaleriaPersonalizados({ ejemplos }: { ejemplos: Ejemplo[
 
     useEffect(() => {
         const el = scrollRef.current;
-        if (!el || ejemplos.length <= 3) return; // si caben todas, no hace falta auto-scroll
+        if (!el || ejemplos.length <= 3) return;
 
         const interval = setInterval(() => {
         if (!el) return;
@@ -40,9 +41,9 @@ export default function GaleriaPersonalizados({ ejemplos }: { ejemplos: Ejemplo[
         {ejemplos.map((ej) => (
             <div
             key={ej.id}
-            className="w-[calc(33.333%-0.7rem)] min-w-[180px] shrink-0 snap-start aspect-square bg-verde-claro rounded-xl overflow-hidden"
+            className="w-[calc(33.333%-0.7rem)] min-w-[180px] shrink-0 snap-start aspect-square bg-verde-claro rounded-xl overflow-hidden relative"
             >
-            <img src={ej.imageUrl} alt={ej.description} className="w-full h-full object-cover" />
+            <ImagenAmpliable src={ej.imageUrl} alt={ej.description} sizes="180px" />
             </div>
         ))}
         </div>
