@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import ImagenAmpliable from '@/components/ImagenAmpliable';
+import GaleriaProducto from '@/components/GaleriaProducto';
 import AgregarAlCarrito from '@/components/AgregarAlCarrito';
 
 async function getProducto(slug: string) {
@@ -52,16 +52,7 @@ export default async function ProductoPage({ params }: { params: { id: string } 
     <main className="max-w-5xl mx-auto px-4 py-8 grid sm:grid-cols-2 gap-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <div className="aspect-square bg-verde-claro rounded-xl overflow-hidden relative">
-        {images[0] && (
-          <ImagenAmpliable
-            src={images[0]}
-            alt={producto.name}
-            priority
-            sizes="(max-width: 640px) 100vw, 50vw"
-          />
-        )}
-      </div>
+      <GaleriaProducto images={images} nombre={producto.name} />
 
       <div>
         <h1 className="font-titulo text-3xl text-tierra-oscuro mb-2">{producto.name}</h1>

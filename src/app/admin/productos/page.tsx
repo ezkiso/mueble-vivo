@@ -10,6 +10,7 @@ interface Producto {
 const clp = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
 const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_SIZE = 5 * 1024 * 1024;
+const MAX_IMAGENES = 8;
 
 export default function AdminProductosPage() {
   const { csrfToken } = useAdminSession();
@@ -36,6 +37,10 @@ export default function AdminProductosPage() {
   async function subirImagen(file: File) {
     setError(null);
 
+    if (form.images.length >= MAX_IMAGENES) {
+      setError(`Máximo ${MAX_IMAGENES} imágenes por producto.`);
+      return;
+    }
     if (!ALLOWED.includes(file.type)) {
       setError('Formato no permitido. Usa JPEG, PNG o WebP.');
       return;
@@ -78,6 +83,10 @@ export default function AdminProductosPage() {
     } finally {
       setSubiendo(false);
     }
+  }
+
+  function quitarImagen(url: string) {
+    setForm((f) => ({ ...f, images: f.images.filter((img) => img !== url) }));
   }
 
   async function guardar(e: React.FormEvent) {
@@ -141,15 +150,29 @@ export default function AdminProductosPage() {
             className="border border-tierra-claro rounded-lg px-3 py-2" />
         </div>
         <div>
-          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && subirImagen(e.target.files[0])} />
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            disabled={form.images.length >= MAX_IMAGENES}
+            onChange={(e) => e.target.files?.[0] && subirImagen(e.target.files[0])}
+          />
+          <p className="text-xs text-gray-400 mt-1">{form.images.length} / {MAX_IMAGENES} imágenes</p>
           {subiendo && <p className="text-sm text-gray-500">Subiendo imagen...</p>}
-          <div className="flex gap-2 mt-2">
-            {form.images.map((url) => <img key={url} src={url} className="w-16 h-16 object-cover rounded" />)}
+          <div className="flex flex-wrap gap-2 mt-2">
+            {form.images.map((url) => (
+              <div key={url} className="relative">
+                <img src={url} className="w-16 h-16 object-cover rounded" />
+                <button
+                  type="button"
+                  onClick={() => quitarImagen(url)}
+                  aria-label="Quitar imagen"
+                  className="absolute -top-1.5 -right-1.5 bg-red-500 text-white w-5 h-5 rounded-full text-xs leading-none flex items-center justify-center"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
           </div>
-        </div>
-        <div className="flex gap-2">
-          <button className="bg-verde text-white px-4 py-2 rounded-lg">{editando ? 'Guardar cambios' : 'Crear producto'}</button>
-          {editando && <button type="button" onClick={resetForm} className="px-4 py-2 border rounded-lg">Cancelar</button>}
         </div>
         <label className="flex items-center gap-2 text-sm">
           <input
@@ -159,6 +182,10 @@ export default function AdminProductosPage() {
           />
           Marcar como vendido (queda visible en la tienda como ejemplo, no comprable)
         </label>
+        <div className="flex gap-2">
+          <button className="bg-verde text-white px-4 py-2 rounded-lg">{editando ? 'Guardar cambios' : 'Crear producto'}</button>
+          {editando && <button type="button" onClick={resetForm} className="px-4 py-2 border rounded-lg">Cancelar</button>}
+        </div>
       </form>
 
       <input placeholder="Buscar producto..." value={q} onChange={(e) => setQ(e.target.value)}
