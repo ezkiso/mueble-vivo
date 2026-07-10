@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useAdminSession } from '@/lib/useAdminSession';
+import QrProducto from '@/components/QrProducto';
 
 interface Producto {
-  id: string; name: string; description: string; price: number; stock: number; images: string[]; sold: boolean;
+  id: string; name: string; description: string; price: number; stock: number; images: string[]; sold: boolean; slug: string;
 }
 
 const clp = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
@@ -20,6 +21,7 @@ export default function AdminProductosPage() {
   const [form, setForm] = useState({ name: '', description: '', price: '', stock: '', images: [] as string[], sold: false });
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [qrProducto, setQrProducto] = useState<Producto | null>(null);
 
   async function cargar() {
     const res = await fetch(`/api/admin/products?q=${encodeURIComponent(q)}`);
@@ -198,10 +200,32 @@ export default function AdminProductosPage() {
             <span>{clp.format(p.price)}</span>
             <span>Stock: {p.stock}</span>
             <button onClick={() => editar(p)} className="underline">Editar</button>
+            <button onClick={() => setQrProducto(p)} className="underline">Ver QR</button>
             <button onClick={() => eliminar(p.id)} className="text-red-500 underline">Eliminar</button>
           </div>
         ))}
       </div>
+
+      {qrProducto && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => setQrProducto(null)}
+        >
+          <div onClick={(e) => e.stopPropagation()} className="max-w-xs w-full">
+            <p className="text-white text-center font-semibold mb-3">{qrProducto.name}</p>
+            <QrProducto
+              url={`${process.env.NEXT_PUBLIC_BASE_URL}/producto/${qrProducto.slug}`}
+              nombreProducto={qrProducto.name}
+            />
+            <button
+              onClick={() => setQrProducto(null)}
+              className="w-full mt-3 text-white text-sm underline"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
