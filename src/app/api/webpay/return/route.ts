@@ -5,10 +5,22 @@ import { commitWebpayTransaction } from '@/lib/webpay';
 import { logSecurityEvent } from '@/lib/bruteforce';
 import { settleOrderAsPaid } from '@/lib/orders';
 
-export async function POST(req: NextRequest) {
-  const formData = await req.formData().catch(() => null);
-  const tokenWs = formData?.get('token_ws')?.toString();
-  const tbkToken = formData?.get('TBK_TOKEN')?.toString();
+// Transbank redirige el retorno exitoso por GET con `token_ws` en el query string
+// (desde la v1.1 de su API). El caso de pago abortado (`TBK_TOKEN`) puede llegar
+// por POST, especialmente en el ambiente de integración. Soportamos ambos métodos
+// con la misma lógica.
+
+async function handleReturn(req: NextRequest) {
+  const searchParams = req.nextUrl.searchParams;
+  let tokenWs = searchParams.get('token_ws') ?? undefined;
+  let tbkToken = searchParams.get('TBK_TOKEN') ?? undefined;
+
+  // Si no vino por query string, puede venir como form-data (POST clásico)
+  if (!tokenWs && !tbkToken && req.method === 'POST') {
+    const formData = await req.formData().catch(() => null);
+    tokenWs = formData?.get('token_ws')?.toString();
+    tbkToken = formData?.get('TBK_TOKEN')?.toString();
+  }
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -58,4 +70,12 @@ export async function POST(req: NextRequest) {
     await logSecurityEvent('WEBPAY_COMMIT_ERROR', null, `orden=${order.buyOrder}`);
     return NextResponse.redirect(`${baseUrl}/checkout/retorno?orden=${order.buyOrder}&estado=error`);
   }
+}
+
+export async function GET(req: NextRequest) {
+  return handleReturn(req);
+}
+
+export async function POST(req: NextRequest) {
+  return handleReturn(req);
 }

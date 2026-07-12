@@ -30,3 +30,24 @@ export function generateUploadSignature() {
     maxFileSizeBytes: 5 * 1024 * 1024,
   };
 }
+// Firma separada para comentarios: folder distinto, límite de tamaño más chico.
+export function generateCommentUploadSignature() {
+  const timestamp = Math.round(Date.now() / 1000);
+  const folder = 'mueble-vivo/comentarios';
+  const allowed_formats = 'jpg,png,webp';
+
+  const signature = cloudinary.utils.api_sign_request(
+    { timestamp, folder, allowed_formats },
+    process.env.CLOUDINARY_API_SECRET as string,
+  );
+
+  return {
+    timestamp,
+    folder,
+    allowed_formats,
+    signature,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    maxFileSizeBytes: 4 * 1024 * 1024, // 4MB, más chico que el de productos
+  };
+}

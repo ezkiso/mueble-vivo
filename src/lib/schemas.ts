@@ -51,3 +51,21 @@ export function isSafeFilename(filename: string): boolean {
   const dangerousPattern = /(\.\w+){2,}$|[<>:"/\\|?*\x00-\x1F]/;
   return !dangerousPattern.test(filename);
 }
+export const buyerVerifySchema = z.object({
+  code: z.string().min(20).max(64),
+});
+
+export const commentSchema = z
+  .object({
+    productId: z.string().cuid(),
+    body: z.string().max(1000).optional().default(''),
+    images: z.array(z.string().url()).max(3).default([]),
+  })
+  .refine((d) => d.body.trim().length >= 3 || d.images.length > 0, {
+    message: 'Escribe un comentario o sube al menos una imagen',
+    path: ['body'],
+  });
+
+export const commentModerationSchema = z.object({
+  status: z.enum(['APPROVED', 'REJECTED']),
+});
