@@ -3,19 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { commitWebpayTransaction } from '@/lib/webpay';
 import { logSecurityEvent } from '@/lib/bruteforce';
-import { settleOrderAsPaid } from '@/app/api/webpay/notify/route';
+import { settleOrderAsPaid } from '@/lib/orders';
 
-// IMPORTANTE sobre el flujo real de Webpay Plus:
-// Transbank NO llama a un webhook independiente para este producto. El único punto
-// de confirmación es este mismo endpoint de retorno, al que Transbank redirige al
-// cliente vía POST con `token_ws` (pago exitoso/rechazado) o `TBK_TOKEN` (abandono).
-// Por eso NUNCA se confía en los parámetros de la URL: se llama a `commit()` (server-to-server)
-// y solo la respuesta AUTORITATIVA de Transbank determina el estado final de la orden.
-// La actualización es idempotente: si la orden ya no está PENDING, no se vuelve a procesar.
 export async function POST(req: NextRequest) {
   const formData = await req.formData().catch(() => null);
   const tokenWs = formData?.get('token_ws')?.toString();
-  const tbkToken = formData?.get('TBK_TOKEN')?.toString(); // usuario abandonó el pago
+  const tbkToken = formData?.get('TBK_TOKEN')?.toString();
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -36,7 +29,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.redirect(`${baseUrl}/checkout/retorno?estado=error`);
   }
 
-  // Idempotencia: si ya fue procesada, no se vuelve a confirmar ni a descontar stock.
   if (order.status !== 'PENDING') {
     return NextResponse.redirect(`${baseUrl}/checkout/retorno?orden=${order.buyOrder}&estado=${order.status.toLowerCase()}`);
   }
@@ -45,16 +37,19 @@ export async function POST(req: NextRequest) {
     const result = await commitWebpayTransaction(tokenWs);
 
     if (result.status === 'AUTHORIZED' && result.response_code === 0) {
-      const outcome = await settleOrderAsPaid(order.id, String(result.authorization_code));
+      const settled = await settleOrderAsPaid(order.id, String(result.authorization_code));
+      const outcome = settled.status;
+      const buyerCode = settled.buyerCode;
 
-      await logSecurityEvent(
-        outcome === 'OVERSOLD' ? 'ORDER_OVERSOLD' : 'ORDER_PAID',
-        null,
-        `orden=${order.buyOrder}`,
-      );
+      if (buyerCode) {
+        await prisma.buyerCredential.update({ where: { orderId: order.id }, data: { revealed: true } });
+      }
+
+      await logSecurityEvent(outcome === 'OVERSOLD' ? 'ORDER_OVERSOLD' : 'ORDER_PAID', null, `orden=${order.buyOrder}`);
 
       const estado = outcome === 'OVERSOLD' ? 'revision' : 'exito';
-      return NextResponse.redirect(`${baseUrl}/checkout/retorno?orden=${order.buyOrder}&estado=${estado}`);
+      const codigoParam = buyerCode ? `&codigo=${encodeURIComponent(buyerCode)}` : '';
+      return NextResponse.redirect(`${baseUrl}/checkout/retorno?orden=${order.buyOrder}&estado=${estado}${codigoParam}`);
     }
 
     await prisma.order.update({ where: { id: order.id }, data: { status: 'FAILED' } });

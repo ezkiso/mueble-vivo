@@ -7,8 +7,8 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL")   // Pooler de Supabase (pgbouncer, puerto 6543)
-  directUrl = env("DIRECT_URL")     // Conexión directa (puerto 5432), usada por prisma db push
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum OrderStatus {
@@ -17,7 +17,13 @@ enum OrderStatus {
   SHIPPED
   CANCELLED
   FAILED
-  OVERSOLD // pago exitoso pero sin stock al momento de confirmar — requiere revisión manual
+  OVERSOLD
+}
+
+enum CommentStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model Product {
@@ -25,16 +31,17 @@ model Product {
   name        String
   slug        String   @unique
   description String
-  price       Int      // CLP, entero (sin decimales)
+  price       Int
   stock       Int      @default(0)
-  images      Json     @default("[]") // array de URLs (Cloudinary)
+  images      Json     @default("[]")
   salesCount  Int      @default(0)
   active      Boolean  @default(true)
-  sold        Boolean  @default(false) // marcado manualmente como "vendido, se muestra como ejemplo"
+  sold        Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  orderItems  OrderItem[]
+  orderItems OrderItem[]
+  comments   Comment[]
 
   @@index([createdAt])
   @@index([salesCount])
@@ -44,20 +51,21 @@ model Order {
   id               String      @id @default(cuid())
   customerName     String
   customerEmail    String
-  customerPhone    String      // obligatorio, incluye código de país (+56...)
+  customerPhone    String
   shippingAddress  String
   shippingLat      Float
   shippingLng      Float
   totalAmount      Int
   status           OrderStatus @default(PENDING)
-  buyOrder         String      @unique // identificador único enviado a Transbank
+  buyOrder         String      @unique
   sessionId        String
-  transactionToken String?     // token retornado por Webpay (create)
-  transactionId    String?     // authorizationCode / detalle tras commit
+  transactionToken String?
+  transactionId    String?
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 
-  items OrderItem[]
+  items           OrderItem[]
+  buyerCredential BuyerCredential?
 
   @@index([status])
   @@index([buyOrder])
@@ -83,20 +91,50 @@ model Admin {
   createdAt      DateTime  @default(now())
 }
 
-// Registro de eventos de seguridad (sin datos sensibles)
 model SecurityLog {
   id        String   @id @default(cuid())
-  event     String   // ej: "LOGIN_FAILED", "LOGIN_SUCCESS", "ORDER_STATUS_CHANGED"
+  event     String
   ip        String?
-  detail    String?  // texto genérico, nunca contraseñas/tokens
+  detail    String?
   createdAt DateTime @default(now())
 }
 
-// Fotos de ejemplo para la página /personalizados (terrarios ya vendidos, subidas desde /admin)
 model EjemploPersonalizado {
   id          String   @id @default(cuid())
   imageUrl    String
   description String
   orden       Int      @default(0)
   createdAt   DateTime @default(now())
+}
+
+model BuyerCredential {
+  id             String   @id @default(cuid())
+  orderId        String   @unique
+  tokenHash      String   @unique
+  tokenEncrypted String
+  customerName   String
+  revealed       Boolean  @default(false)
+  revoked        Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  order    Order     @relation(fields: [orderId], references: [id])
+  comments Comment[]
+
+  @@index([orderId])
+}
+
+model Comment {
+  id        String        @id @default(cuid())
+  productId String
+  buyerId   String
+  body      String
+  images    Json          @default("[]")
+  status    CommentStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+
+  product Product         @relation(fields: [productId], references: [id])
+  buyer   BuyerCredential @relation(fields: [buyerId], references: [id])
+
+  @@index([productId, status])
+  @@index([buyerId])
 }
