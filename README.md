@@ -27,8 +27,7 @@ Si el catálogo fuera muy pequeño (<50 productos), Supabase Storage también se
 El enunciado pedía un webhook `/api/webpay/notify` independiente del `return_url`. En la
 práctica, **Webpay Plus no emite un webhook asíncrono propio** (a diferencia de Stripe o
 Mercado Pago): el único punto de confirmación real es el propio `return_url`, al que Transbank
-redirige al cliente vía POST. Por eso el proyecto implementa la misma garantía de seguridad que
-pedías, pero de forma técnicamente correcta:
+redirige al cliente vía POST:
 
 - **`/api/webpay/return`**: recibe el `token_ws`, pero **nunca confía en los parámetros de la
   URL**. Llama a `commit()` (server-to-server contra los servidores de Transbank) y solo esa
