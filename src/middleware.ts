@@ -1,5 +1,6 @@
+// src/middleware.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
+import { verifySessionJwt } from '@/lib/jwt';
 
 const COOKIE_NAME = 'mv_session';
 
@@ -18,7 +19,7 @@ export async function middleware(req: NextRequest) {
   }
 
   try {
-    await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET));
+    await verifySessionJwt(token);
     return NextResponse.next();
   } catch {
     return redirectOrUnauthorized(req, isAdminApi);

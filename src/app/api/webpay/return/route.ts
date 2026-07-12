@@ -1,7 +1,9 @@
+// src/app/api/webpay/return/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { commitWebpayTransaction } from '@/lib/webpay';
 import { logSecurityEvent } from '@/lib/bruteforce';
+import { settleOrderAsPaid } from '@/app/api/webpay/notify/route';
 
 // IMPORTANTE sobre el flujo real de Webpay Plus:
 // Transbank NO llama a un webhook independiente para este producto. El único punto
@@ -43,26 +45,16 @@ export async function POST(req: NextRequest) {
     const result = await commitWebpayTransaction(tokenWs);
 
     if (result.status === 'AUTHORIZED' && result.response_code === 0) {
-      await prisma.$transaction(async (tx) => {
-        await tx.order.update({
-          where: { id: order.id },
-          data: { status: 'PAID', transactionId: String(result.authorization_code) },
-        });
+      const outcome = await settleOrderAsPaid(order.id, String(result.authorization_code));
 
-        const items = await tx.orderItem.findMany({ where: { orderId: order.id } });
-        for (const item of items) {
-          await tx.product.update({
-            where: { id: item.productId },
-            data: {
-              stock: { decrement: item.quantity },
-              salesCount: { increment: item.quantity },
-            },
-          });
-        }
-      });
+      await logSecurityEvent(
+        outcome === 'OVERSOLD' ? 'ORDER_OVERSOLD' : 'ORDER_PAID',
+        null,
+        `orden=${order.buyOrder}`,
+      );
 
-      await logSecurityEvent('ORDER_PAID', null, `orden=${order.buyOrder}`);
-      return NextResponse.redirect(`${baseUrl}/checkout/retorno?orden=${order.buyOrder}&estado=exito`);
+      const estado = outcome === 'OVERSOLD' ? 'revision' : 'exito';
+      return NextResponse.redirect(`${baseUrl}/checkout/retorno?orden=${order.buyOrder}&estado=${estado}`);
     }
 
     await prisma.order.update({ where: { id: order.id }, data: { status: 'FAILED' } });

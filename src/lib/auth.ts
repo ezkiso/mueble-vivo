@@ -1,5 +1,7 @@
-import { SignJWT, jwtVerify } from 'jose';
+// src/lib/auth.ts
+import { SignJWT } from 'jose';
 import { cookies } from 'next/headers';
+import { verifySessionJwt, type AdminSession } from '@/lib/jwt';
 
 const secret = () => {
   if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET no configurado');
@@ -7,11 +9,7 @@ const secret = () => {
 };
 
 export const COOKIE_NAME = 'mv_session';
-
-export interface AdminSession {
-  sub: string; // admin id
-  username: string;
-}
+export type { AdminSession };
 
 // Crea un JWT firmado (HS256) con expiración corta.
 export async function createSessionToken(payload: AdminSession): Promise<string> {
@@ -24,8 +22,7 @@ export async function createSessionToken(payload: AdminSession): Promise<string>
 
 // Verifica un JWT. Lanza si es inválido/expirado.
 export async function verifySessionToken(token: string): Promise<AdminSession> {
-  const { payload } = await jwtVerify(token, secret());
-  return payload as unknown as AdminSession;
+  return verifySessionJwt(token);
 }
 
 // Setea la cookie httpOnly de sesión (llamar desde una Route Handler / Server Action).

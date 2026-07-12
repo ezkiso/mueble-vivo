@@ -17,6 +17,7 @@ enum OrderStatus {
   SHIPPED
   CANCELLED
   FAILED
+  OVERSOLD // pago exitoso pero sin stock al momento de confirmar — requiere revisión manual
 }
 
 model Product {
