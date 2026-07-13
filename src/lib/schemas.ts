@@ -39,7 +39,7 @@ export const checkoutSchema = z.object({
 });
 
 export const orderStatusSchema = z.object({
-  status: z.enum(['PENDING', 'PAID', 'SHIPPED', 'CANCELLED', 'FAILED']),
+  status: z.enum(['PENDING', 'PAID', 'SHIPPED', 'CANCELLED', 'FAILED', 'OVERSOLD']),
 });
 
 // Validación de archivos de imagen (MIME + tamaño), reforzada también en backend
