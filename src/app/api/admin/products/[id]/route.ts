@@ -4,8 +4,10 @@ import { prisma } from '@/lib/prisma';
 import { productSchema } from '@/lib/schemas';
 import { validateCsrf } from '@/lib/csrf';
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  if (!validateCsrf(req.headers.get('x-csrf-token'))) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
+  if (!(await validateCsrf(req.headers.get('x-csrf-token')))) {
     return NextResponse.json({ error: 'Token CSRF inválido' }, { status: 403 });
   }
 
@@ -16,7 +18,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 
   const product = await prisma.product.update({
-    where: { id: params.id },
+    where: { id },
     data: parsed.data,
   }).catch(() => null);
 
@@ -24,20 +26,20 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json(product);
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  if (!validateCsrf(req.headers.get('x-csrf-token'))) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
+  if (!(await validateCsrf(req.headers.get('x-csrf-token')))) {
     return NextResponse.json({ error: 'Token CSRF inválido' }, { status: 403 });
   }
 
   try {
-    await prisma.product.delete({ where: { id: params.id } });
+    await prisma.product.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch (err: any) {
-    // P2025 = registro no encontrado (ya estaba borrado o el id no existe)
     if (err?.code === 'P2025') {
       return NextResponse.json({ error: 'Producto no encontrado' }, { status: 404 });
     }
-    // P2003 = violación de foreign key (tiene órdenes o comentarios asociados)
     if (err?.code === 'P2003') {
       return NextResponse.json(
         { error: 'No se puede eliminar: este producto tiene órdenes o comentarios asociados. Márcalo como inactivo en vez de eliminarlo.' },

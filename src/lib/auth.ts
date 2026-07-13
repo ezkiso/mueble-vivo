@@ -11,7 +11,6 @@ const secret = () => {
 export const COOKIE_NAME = 'mv_session';
 export type { AdminSession };
 
-// Crea un JWT firmado (HS256) con expiración corta.
 export async function createSessionToken(payload: AdminSession): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256' })
@@ -20,29 +19,30 @@ export async function createSessionToken(payload: AdminSession): Promise<string>
     .sign(secret());
 }
 
-// Verifica un JWT. Lanza si es inválido/expirado.
 export async function verifySessionToken(token: string): Promise<AdminSession> {
   return verifySessionJwt(token);
 }
 
-// Setea la cookie httpOnly de sesión (llamar desde una Route Handler / Server Action).
-export function setSessionCookie(token: string) {
-  cookies().set(COOKIE_NAME, token, {
+// cookies() ahora es async en Next.js 15 — todo caller de esta función pasa a ser async también.
+export async function setSessionCookie(token: string) {
+  const cookieStore = await cookies();
+  cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
     path: '/',
-    maxAge: 60 * 20, // 20 minutos, alineado con JWT_EXPIRES_IN
+    maxAge: 60 * 20,
   });
 }
 
-export function clearSessionCookie() {
-  cookies().set(COOKIE_NAME, '', { httpOnly: true, path: '/', maxAge: 0 });
+export async function clearSessionCookie() {
+  const cookieStore = await cookies();
+  cookieStore.set(COOKIE_NAME, '', { httpOnly: true, path: '/', maxAge: 0 });
 }
 
-// Helper para obtener la sesión actual en Server Components / Route Handlers.
 export async function getSession(): Promise<AdminSession | null> {
-  const token = cookies().get(COOKIE_NAME)?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
   try {
     return await verifySessionToken(token);

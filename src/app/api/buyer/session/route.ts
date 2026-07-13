@@ -7,6 +7,6 @@ export async function GET() {
     const session = await getBuyerSession();
     if (!session) return NextResponse.json({ authenticated: false });
 
-    const csrfToken = issueCsrfToken();
+    const csrfToken = await issueCsrfToken();
     return NextResponse.json({ authenticated: true, name: session.name, csrfToken });
 }

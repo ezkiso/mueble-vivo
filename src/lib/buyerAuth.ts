@@ -11,8 +11,8 @@ export const BUYER_COOKIE_NAME = 'mv_buyer';
 const NINETY_DAYS = 60 * 60 * 24 * 90;
 
 export interface BuyerSession {
-    sub: string; // BuyerCredential.id
-    name: string; // nombre ya enmascarado, listo para mostrar
+    sub: string;
+    name: string;
 }
 
 export async function createBuyerSessionToken(payload: BuyerSession): Promise<string> {
@@ -23,8 +23,9 @@ export async function createBuyerSessionToken(payload: BuyerSession): Promise<st
         .sign(secret());
 }
 
-export function setBuyerSessionCookie(token: string) {
-    cookies().set(BUYER_COOKIE_NAME, token, {
+export async function setBuyerSessionCookie(token: string) {
+    const cookieStore = await cookies();
+    cookieStore.set(BUYER_COOKIE_NAME, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
@@ -33,12 +34,14 @@ export function setBuyerSessionCookie(token: string) {
     });
 }
 
-export function clearBuyerSessionCookie() {
-    cookies().set(BUYER_COOKIE_NAME, '', { httpOnly: true, path: '/', maxAge: 0 });
+export async function clearBuyerSessionCookie() {
+    const cookieStore = await cookies();
+    cookieStore.set(BUYER_COOKIE_NAME, '', { httpOnly: true, path: '/', maxAge: 0 });
 }
 
 export async function getBuyerSession(): Promise<BuyerSession | null> {
-    const token = cookies().get(BUYER_COOKIE_NAME)?.value;
+    const cookieStore = await cookies();
+    const token = cookieStore.get(BUYER_COOKIE_NAME)?.value;
     if (!token) return null;
     try {
         const { payload } = await jwtVerify(token, secret());
@@ -46,4 +49,4 @@ export async function getBuyerSession(): Promise<BuyerSession | null> {
     } catch {
         return null;
     }
-    }
+}

@@ -1,3 +1,4 @@
+// src/app/tienda/page.tsx
 import { prisma } from '@/lib/prisma';
 import ProductCard from '@/components/ProductCard';
 import Link from 'next/link';
@@ -12,9 +13,15 @@ const sortMap: Record<string, any> = {
 export const metadata = { title: 'Tienda' };
 export const revalidate = 60;
 
-export default async function TiendaPage({ searchParams }: { searchParams: { sort?: string; page?: string } }) {
-  const sort = sortMap[searchParams.sort || 'recientes'] ? searchParams.sort! : 'recientes';
-  const page = Math.max(1, parseInt(searchParams.page || '1', 10) || 1);
+export default async function TiendaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sort?: string; page?: string }>;
+}) {
+  const resolvedSearchParams = await searchParams;
+
+  const sort = sortMap[resolvedSearchParams.sort || 'recientes'] ? resolvedSearchParams.sort! : 'recientes';
+  const page = Math.max(1, parseInt(resolvedSearchParams.page || '1', 10) || 1);
   const perPage = 12;
 
   const [items, total] = await Promise.all([

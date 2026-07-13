@@ -1,3 +1,4 @@
+// src/lib/csrf.ts
 import { cookies } from 'next/headers';
 import { createHmac, randomBytes, timingSafeEqual } from 'crypto';
 
@@ -11,10 +12,12 @@ function sign(value: string): string {
 
 // Genera un token CSRF y lo guarda en una cookie legible por JS (no httpOnly),
 // para que el cliente pueda reenviarlo en un header personalizado (doble submit cookie).
-export function issueCsrfToken(): string {
+// Ahora async porque cookies() lo es en Next.js 15 — cada caller debe usar await.
+export async function issueCsrfToken(): Promise<string> {
   const raw = randomBytes(24).toString('hex');
   const token = `${raw}.${sign(raw)}`;
-  cookies().set(CSRF_COOKIE, token, {
+  const cookieStore = await cookies();
+  cookieStore.set(CSRF_COOKIE, token, {
     httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
@@ -25,8 +28,9 @@ export function issueCsrfToken(): string {
 }
 
 // Valida que el header X-CSRF-Token coincida con la cookie y que la firma sea válida.
-export function validateCsrf(headerToken: string | null): boolean {
-  const cookieToken = cookies().get(CSRF_COOKIE)?.value;
+export async function validateCsrf(headerToken: string | null): Promise<boolean> {
+  const cookieStore = await cookies();
+  const cookieToken = cookieStore.get(CSRF_COOKIE)?.value;
   if (!headerToken || !cookieToken || headerToken !== cookieToken) return false;
   const [raw, sig] = cookieToken.split('.');
   if (!raw || !sig) return false;

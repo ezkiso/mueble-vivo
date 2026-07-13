@@ -12,8 +12,9 @@ async function getProducto(slug: string) {
 
 export const revalidate = 60;
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const producto = await getProducto(params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const producto = await getProducto(id);
   if (!producto) return {};
 
   return {
@@ -28,8 +29,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-export default async function ProductoPage({ params }: { params: { id: string } }) {
-  const producto = await getProducto(params.id);
+export default async function ProductoPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const producto = await getProducto(id);
   if (!producto || !producto.active) notFound();
 
   const images = Array.isArray(producto.images) ? (producto.images as string[]) : [];

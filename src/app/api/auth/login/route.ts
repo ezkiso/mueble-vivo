@@ -1,3 +1,4 @@
+// src/app/api/auth/login/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
@@ -20,8 +21,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
 
-  // Trim defensivo también en el backend: nunca confiar en que el frontend
-  // ya limpió espacios (teclados móviles a veces agregan espacios invisibles).
   const username = parsed.data.username.trim();
   const password = parsed.data.password.trim();
 
@@ -51,7 +50,7 @@ export async function POST(req: NextRequest) {
   await logSecurityEvent('LOGIN_SUCCESS', ip, `admin=${admin.id}`);
 
   const token = await createSessionToken({ sub: admin.id, username: admin.username });
-  setSessionCookie(token);
+  await setSessionCookie(token); // antes era síncrono, ahora hay que esperarlo
 
   return NextResponse.json({ ok: true });
 }

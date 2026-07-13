@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
 
     const displayName = maskBuyerName(credential.customerName);
     const token = await createBuyerSessionToken({ sub: credential.id, name: displayName });
-    setBuyerSessionCookie(token);
-    const csrfToken = issueCsrfToken();
+    await setBuyerSessionCookie(token);
+    const csrfToken = await issueCsrfToken();
 
     if (!credential.revealed) {
         await prisma.buyerCredential.update({ where: { id: credential.id }, data: { revealed: true } });

@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const session = await getBuyerSession();
     if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
-    if (!validateCsrf(req.headers.get('x-csrf-token'))) {
+    if (!(await validateCsrf(req.headers.get('x-csrf-token')))) {
         return NextResponse.json({ error: 'Token CSRF inválido' }, { status: 403 });
     }
 

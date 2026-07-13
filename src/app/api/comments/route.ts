@@ -21,8 +21,6 @@ export async function GET(req: NextRequest) {
         include: { buyer: { select: { customerName: true } } },
     });
 
-    // Si el visitante está verificado, además le mostramos sus propios comentarios
-    // pendientes/rechazados en este producto (solo los suyos, con su estado).
     let ownPending: typeof approved = [];
     if (session) {
         ownPending = await prisma.comment.findMany({
@@ -51,7 +49,7 @@ export async function GET(req: NextRequest) {
     const session = await getBuyerSession();
     if (!session) return NextResponse.json({ error: 'Debes verificar tu código de comprador' }, { status: 401 });
 
-    if (!validateCsrf(req.headers.get('x-csrf-token'))) {
+    if (!(await validateCsrf(req.headers.get('x-csrf-token')))) {
         return NextResponse.json({ error: 'Token CSRF inválido' }, { status: 403 });
     }
 

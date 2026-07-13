@@ -1,3 +1,4 @@
+// src/app/api/admin/products/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { productSchema } from '@/lib/schemas';
@@ -6,10 +7,10 @@ import { validateCsrf } from '@/lib/csrf';
 function slugify(name: string): string {
   return name
     .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quita tildes
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
-    + '-' + Math.random().toString(36).slice(2, 7); // sufijo para unicidad
+    + '-' + Math.random().toString(36).slice(2, 7);
 }
 
 export async function GET(req: NextRequest) {
@@ -26,7 +27,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!validateCsrf(req.headers.get('x-csrf-token'))) {
+  if (!(await validateCsrf(req.headers.get('x-csrf-token')))) {
     return NextResponse.json({ error: 'Token CSRF inválido' }, { status: 403 });
   }
 
