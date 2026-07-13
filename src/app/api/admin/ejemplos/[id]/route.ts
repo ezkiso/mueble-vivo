@@ -8,6 +8,13 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         return NextResponse.json({ error: 'Token CSRF inválido' }, { status: 403 });
     }
 
-    await prisma.ejemploPersonalizado.delete({ where: { id: params.id } }).catch(() => null);
-    return NextResponse.json({ ok: true });
+    try {
+        await prisma.ejemploPersonalizado.delete({ where: { id: params.id } });
+        return NextResponse.json({ ok: true });
+    } catch (err: any) {
+        if (err?.code === 'P2025') {
+        return NextResponse.json({ error: 'Ejemplo no encontrado' }, { status: 404 });
+        }
+        return NextResponse.json({ error: 'No se pudo eliminar el ejemplo' }, { status: 500 });
     }
+}
