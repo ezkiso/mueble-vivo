@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import ImagenAmpliable from '@/components/ImagenAmpliable';
 
 interface Comentario {
     id: string;
@@ -187,10 +188,20 @@ export default function ComentariosProducto({ productId }: { productId: string }
 
             <div className="flex flex-wrap gap-2 mb-3">
                 {imagenes.map((url) => (
-                <img key={url} src={url} alt="" className="w-16 h-16 object-cover rounded border" />
+                <div key={url} className="relative w-20 h-20 rounded border overflow-hidden group">
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                    <button
+                    type="button"
+                    onClick={() => setImagenes((prev) => prev.filter((u) => u !== url))}
+                    aria-label="Quitar imagen"
+                    className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transicion-suave"
+                    >
+                    ✕
+                    </button>
+                </div>
                 ))}
                 {imagenes.length < 3 && (
-                <label className="w-16 h-16 border-2 border-dashed rounded flex items-center justify-center text-xs text-gray-400 cursor-pointer">
+                <label className="w-20 h-20 border-2 border-dashed rounded flex items-center justify-center text-xs text-gray-400 cursor-pointer">
                     {subiendo ? '...' : '+ Foto'}
                     <input
                     type="file"
@@ -239,8 +250,10 @@ export default function ComentariosProducto({ productId }: { productId: string }
                 {c.body && <p className="text-sm text-gray-700 mb-2">{c.body}</p>}
                 {c.images.length > 0 && (
                     <div className="flex flex-wrap gap-2">
-                    {c.images.map((url) => (
-                        <img key={url} src={url} alt="" className="w-20 h-20 object-cover rounded border" />
+                    {c.images.map((url, i) => (
+                        <div key={url} className="relative w-28 h-28 rounded border overflow-hidden">
+                        <ImagenAmpliable src={url} alt={`Foto ${i + 1} del comentario de ${c.authorName}`} sizes="112px" />
+                        </div>
                     ))}
                     </div>
                 )}

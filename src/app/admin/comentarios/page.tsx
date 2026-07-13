@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAdminSession } from '@/lib/useAdminSession';
+import ImagenAmpliable from '@/components/ImagenAmpliable';
 
 interface ComentarioAdmin {
     id: string;
@@ -12,7 +13,7 @@ interface ComentarioAdmin {
     createdAt: string;
     product: { name: string; slug: string };
     buyer: { customerName: string };
-    }
+}
 
 const TABS: { key: ComentarioAdmin['status']; label: string }[] = [
     { key: 'PENDING', label: 'Pendientes' },
@@ -99,10 +100,10 @@ export default function AdminComentariosPage() {
                 {c.body && <p className="text-sm text-gray-700 mb-3">{c.body}</p>}
                 {c.images.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-3">
-                    {c.images.map((url) => (
-                        <a key={url} href={url} target="_blank">
-                        <img src={url} className="w-20 h-20 object-cover rounded border" />
-                        </a>
+                    {c.images.map((url, i) => (
+                        <div key={url} className="relative w-28 h-28 rounded border overflow-hidden">
+                        <ImagenAmpliable src={url} alt={`Foto ${i + 1} del comentario`} sizes="112px" />
+                        </div>
                     ))}
                     </div>
                 )}
