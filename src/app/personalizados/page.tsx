@@ -5,6 +5,11 @@ import GaleriaPersonalizados from '@/components/GaleriaPersonalizados';
 
 export const dynamic = 'force-dynamic'; // siempre trae datos frescos (sin caché de ISR)
 
+function toOgImage(url: string): string {
+    return url.replace('/upload/', '/upload/w_1200,h_630,c_fill,g_auto/');
+}
+
+
 export async function generateMetadata(): Promise<Metadata> {
     const primerEjemplo = await prisma.ejemploPersonalizado.findFirst({ orderBy: { orden: 'asc' } });
 
@@ -14,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
         openGraph: {
         title: 'Terrarios Personalizados | Mueble Vivo',
         description: 'Elige el jarro, el sustrato, las plantas y la decoración. Cotización a medida.',
-        images: primerEjemplo ? [primerEjemplo.imageUrl] : [],
+        images: primerEjemplo ? [{ url: toOgImage(primerEjemplo.imageUrl), width: 1200, height: 630 }] : [],
         },
     };
 }

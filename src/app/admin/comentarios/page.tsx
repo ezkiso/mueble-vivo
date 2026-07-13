@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Star } from 'lucide-react';
 import { useAdminSession } from '@/lib/useAdminSession';
 import ImagenAmpliable from '@/components/ImagenAmpliable';
 
@@ -9,6 +10,7 @@ interface ComentarioAdmin {
     id: string;
     body: string;
     images: string[];
+    rating: number | null;
     status: 'PENDING' | 'APPROVED' | 'REJECTED';
     createdAt: string;
     product: { name: string; slug: string };
@@ -20,6 +22,16 @@ const TABS: { key: ComentarioAdmin['status']; label: string }[] = [
     { key: 'APPROVED', label: 'Aprobados' },
     { key: 'REJECTED', label: 'Rechazados' },
 ];
+
+function Estrellas({ valor }: { valor: number }) {
+    return (
+        <span className="inline-flex gap-0.5">
+        {[1, 2, 3, 4, 5].map((n) => (
+            <Star key={n} size={14} className={n <= valor ? 'fill-amber-400 text-amber-400' : 'text-gray-300'} />
+        ))}
+        </span>
+    );
+}
 
 export default function AdminComentariosPage() {
     const { csrfToken } = useAdminSession();
@@ -97,6 +109,7 @@ export default function AdminComentariosPage() {
                     </a>
                 </div>
                 <p className="text-xs text-gray-400 mb-2">{new Date(c.createdAt).toLocaleString('es-CL')}</p>
+                {c.rating && <div className="mb-2"><Estrellas valor={c.rating} /></div>}
                 {c.body && <p className="text-sm text-gray-700 mb-3">{c.body}</p>}
                 {c.images.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-3">
@@ -109,25 +122,16 @@ export default function AdminComentariosPage() {
                 )}
                 <div className="flex gap-2">
                     {tab !== 'APPROVED' && (
-                    <button
-                        onClick={() => moderar(c.id, 'APPROVED')}
-                        className="bg-verde text-white px-3 py-1.5 rounded text-sm font-semibold"
-                    >
+                    <button onClick={() => moderar(c.id, 'APPROVED')} className="bg-verde text-white px-3 py-1.5 rounded text-sm font-semibold">
                         Aprobar
                     </button>
                     )}
                     {tab !== 'REJECTED' && (
-                    <button
-                        onClick={() => moderar(c.id, 'REJECTED')}
-                        className="border border-tierra-claro px-3 py-1.5 rounded text-sm"
-                    >
+                    <button onClick={() => moderar(c.id, 'REJECTED')} className="border border-tierra-claro px-3 py-1.5 rounded text-sm">
                         Rechazar
                     </button>
                     )}
-                    <button
-                    onClick={() => eliminar(c.id)}
-                    className="text-red-500 underline text-sm ml-auto"
-                    >
+                    <button onClick={() => eliminar(c.id)} className="text-red-500 underline text-sm ml-auto">
                     Eliminar
                     </button>
                 </div>

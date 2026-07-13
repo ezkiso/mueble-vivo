@@ -129,6 +129,7 @@ model Comment {
   buyerId   String
   body      String
   images    Json          @default("[]")
+  rating    Int?          // 1-5, opcional
   status    CommentStatus @default(PENDING)
   createdAt DateTime      @default(now())
 

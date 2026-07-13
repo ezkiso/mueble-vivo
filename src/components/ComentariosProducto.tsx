@@ -2,16 +2,59 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { Star } from 'lucide-react';
 import ImagenAmpliable from '@/components/ImagenAmpliable';
 
 interface Comentario {
     id: string;
     body: string;
     images: string[];
+    rating: number | null;
     createdAt: string;
     status: 'PENDING' | 'APPROVED' | 'REJECTED';
     authorName: string;
     isMine: boolean;
+}
+
+function Estrellas({ valor, tamaño = 16 }: { valor: number; tamaño?: number }) {
+    return (
+        <span className="inline-flex gap-0.5">
+        {[1, 2, 3, 4, 5].map((n) => (
+            <Star
+            key={n}
+            size={tamaño}
+            className={n <= valor ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}
+            />
+        ))}
+        </span>
+    );
+}
+
+function SelectorEstrellas({ valor, onChange }: { valor: number | null; onChange: (v: number | null) => void }) {
+    const [hover, setHover] = useState<number | null>(null);
+    const mostrado = hover ?? valor ?? 0;
+
+    return (
+        <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((n) => (
+            <button
+            key={n}
+            type="button"
+            onMouseEnter={() => setHover(n)}
+            onMouseLeave={() => setHover(null)}
+            onClick={() => onChange(valor === n ? null : n)}
+            aria-label={`${n} estrellas`}
+            >
+            <Star size={22} className={n <= mostrado ? 'fill-amber-400 text-amber-400' : 'text-gray-300'} />
+            </button>
+        ))}
+        {valor !== null && (
+            <button type="button" onClick={() => onChange(null)} className="text-xs text-gray-400 underline ml-1">
+            quitar
+            </button>
+        )}
+        </div>
+    );
 }
 
 export default function ComentariosProducto({ productId }: { productId: string }) {
@@ -26,6 +69,7 @@ export default function ComentariosProducto({ productId }: { productId: string }
     const [cargandoLista, setCargandoLista] = useState(true);
 
     const [texto, setTexto] = useState('');
+    const [rating, setRating] = useState<number | null>(null);
     const [imagenes, setImagenes] = useState<string[]>([]);
     const [subiendo, setSubiendo] = useState(false);
     const [enviando, setEnviando] = useState(false);
@@ -131,7 +175,7 @@ export default function ComentariosProducto({ productId }: { productId: string }
         const res = await fetch('/api/comments', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
-            body: JSON.stringify({ productId, body: texto, images: imagenes }),
+            body: JSON.stringify({ productId, body: texto, images: imagenes, rating: rating ?? undefined }),
         });
         const data = await res.json();
         if (!res.ok) {
@@ -140,6 +184,7 @@ export default function ComentariosProducto({ productId }: { productId: string }
         }
         setTexto('');
         setImagenes([]);
+        setRating(null);
         await cargarComentarios();
         } finally {
         setEnviando(false);
@@ -177,6 +222,12 @@ export default function ComentariosProducto({ productId }: { productId: string }
         {autenticado && (
             <form onSubmit={enviarComentario} className="bg-tierra-claro/30 border rounded-lg p-4 mb-8">
             <p className="text-sm text-gray-600 mb-2">Comentando como <strong>{nombre}</strong></p>
+
+            <div className="mb-3">
+                <p className="text-xs text-gray-500 mb-1">Calificación (opcional)</p>
+                <SelectorEstrellas valor={rating} onChange={setRating} />
+            </div>
+
             <textarea
                 value={texto}
                 onChange={(e) => setTexto(e.target.value)}
@@ -247,6 +298,7 @@ export default function ComentariosProducto({ productId }: { productId: string }
                     </span>
                     )}
                 </div>
+                {c.rating && <div className="mb-2"><Estrellas valor={c.rating} /></div>}
                 {c.body && <p className="text-sm text-gray-700 mb-2">{c.body}</p>}
                 {c.images.length > 0 && (
                     <div className="flex flex-wrap gap-2">

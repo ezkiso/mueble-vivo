@@ -60,11 +60,12 @@ export const commentSchema = z
     productId: z.string().cuid(),
     body: z.string().max(1000).optional().default(''),
     images: z.array(z.string().url()).max(3).default([]),
+    rating: z.number().int().min(1).max(5).optional(),
   })
   .refine((d) => d.body.trim().length >= 3 || d.images.length > 0, {
     message: 'Escribe un comentario o sube al menos una imagen',
     path: ['body'],
-  });
+});
 
 export const commentModerationSchema = z.object({
   status: z.enum(['APPROVED', 'REJECTED']),

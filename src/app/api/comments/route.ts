@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
         id: c.id,
         body: c.body,
         images: c.images,
+        rating: c.rating,
         createdAt: c.createdAt,
         status: c.status,
         authorName: maskBuyerName(c.buyer.customerName),
@@ -73,6 +74,7 @@ export async function GET(req: NextRequest) {
         buyerId: session.sub,
         body: parsed.data.body.trim(),
         images: parsed.data.images,
+        rating: parsed.data.rating ?? null,
         status: 'PENDING',
         },
     });

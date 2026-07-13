@@ -13,11 +13,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
   title: { default: 'Mueble Vivo — Terrarios artesanales', template: '%s | Mueble Vivo' },
   description: 'Terrarios artesanales hechos a mano en Chile. Trae un pedazo de bosque a tu hogar.',
-  openGraph: {
+    openGraph: {
     type: 'website',
     locale: 'es_CL',
     siteName: 'Mueble Vivo',
-    images: ['/og-default.jpg'],
+    images: [{ url: '/og-default.jpg', width: 1200, height: 630 }],
   },
   robots: { index: true, follow: true },
 };

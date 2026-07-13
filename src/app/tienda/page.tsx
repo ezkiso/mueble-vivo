@@ -2,6 +2,7 @@
 import { prisma } from '@/lib/prisma';
 import ProductCard from '@/components/ProductCard';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 
 const sortMap: Record<string, any> = {
   recientes: { createdAt: 'desc' },
@@ -10,7 +11,11 @@ const sortMap: Record<string, any> = {
   mas_vendidos: { salesCount: 'desc' },
 };
 
-export const metadata = { title: 'Tienda' };
+export const metadata: Metadata = {
+  title: 'Tienda',
+  description: 'Terrarios artesanales listos para comprar: musgos, suculentas y helechos en macetas de vidrio hechas a mano en Chile.',
+  alternates: { canonical: '/tienda' },
+};
 export const revalidate = 60;
 
 export default async function TiendaPage({
