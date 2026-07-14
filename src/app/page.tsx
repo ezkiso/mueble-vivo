@@ -13,7 +13,6 @@ async function getDestacados() {
     select: { id: true, name: true, slug: true, price: true, images: true, stock: true, sold: true },
   });
 }
-<meta name="google-site-verification" content="8hG1PXfzuhfEu4J_mN8AktmJR42FMC8Rj5EqPG85UH0" />
 async function getRecientes() {
   return prisma.product.findMany({
     where: { active: true },
