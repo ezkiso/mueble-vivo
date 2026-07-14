@@ -9,8 +9,6 @@ import BotonWhatsapp from '@/components/BotonWhatsapp';
 const lora = Lora({ subsets: ['latin'], variable: '--font-lora', display: 'swap' });
 const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito', display: 'swap' });
 
-<meta name="google-site-verification" content="8hG1PXfzuhfEu4J_mN8AktmJR42FMC8Rj5EqPG85UH0" />
-
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
   title: { default: 'Mueble Vivo — Terrarios artesanales', template: '%s | Mueble Vivo' },
