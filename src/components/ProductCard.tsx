@@ -31,6 +31,7 @@ export default function ProductCard({ product }: { product: ProductCardProps }) 
               alt={product.name}
               fill
               sizes="(max-width: 640px) 50vw, 25vw"
+              loading="lazy"
               className={`object-contain group-hover:scale-105 transicion-suave ${product.sold ? 'opacity-70' : ''}`}
             />
           )}

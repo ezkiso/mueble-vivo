@@ -38,7 +38,7 @@ export default function GaleriaProducto({ images, nombre }: Props) {
                 }`}
                 aria-label={`Ver foto ${i + 1} de ${nombre}`}
                 >
-                <Image src={url} alt="" fill sizes="64px" className="object-cover" />
+                <Image src={url} alt="" fill sizes="64px" loading="lazy" className="object-cover" />
                 </button>
             ))}
             </div>
