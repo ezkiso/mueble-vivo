@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ImagenAmpliable from '@/components/ImagenAmpliable';
 
@@ -12,10 +12,69 @@ interface Ejemplo {
 
 export default function GaleriaPersonalizados({ ejemplos }: { ejemplos: Ejemplo[] }) {
     const scrollRef = useRef<HTMLDivElement>(null);
+    const [imagesLoaded, setImagesLoaded] = useState(false);
+    const [visibleIndices, setVisibleIndices] = useState<Set<number>>(new Set([0, 1, 2]));
+
+    // Intersection Observer para lazy loading eficiente
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    const index = parseInt((entry.target as HTMLElement).dataset.index || '0');
+                    if (entry.isIntersecting) {
+                        setVisibleIndices((prev) => new Set([...prev, index]));
+                    }
+                });
+            },
+            { root: el, threshold: 0.1 }
+        );
+
+        const items = el.querySelectorAll('[data-index]');
+        items.forEach((item) => observer.observe(item));
+
+        return () => observer.disconnect();
+    }, [ejemplos.length]);
 
     useEffect(() => {
         const el = scrollRef.current;
         if (!el || ejemplos.length <= 3) return;
+
+        // Esperar a que carguen las primeras imágenes visibles
+        let loadedCount = 0;
+        const totalToLoad = Math.min(3, ejemplos.length);
+        
+        const checkImagesLoaded = () => {
+            const images = el.querySelectorAll('img');
+            images.forEach((img, index) => {
+                if (index < totalToLoad && img.complete) {
+                    loadedCount++;
+                }
+            });
+            
+            if (loadedCount >= totalToLoad) {
+                setImagesLoaded(true);
+            }
+        };
+
+        checkImagesLoaded();
+
+        const checkInterval = setInterval(() => {
+            if (!imagesLoaded) {
+                checkImagesLoaded();
+            } else {
+                clearInterval(checkInterval);
+            }
+        }, 500);
+
+        return () => clearInterval(checkInterval);
+    }, [ejemplos.length, imagesLoaded]);
+
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el || ejemplos.length <= 3 || !imagesLoaded) return;
 
         const interval = setInterval(() => {
         if (!el) return;
@@ -27,7 +86,7 @@ export default function GaleriaPersonalizados({ ejemplos }: { ejemplos: Ejemplo[
         }, 10000);
 
         return () => clearInterval(interval);
-    }, [ejemplos.length]);
+    }, [ejemplos.length, imagesLoaded]);
 
     const scroll = (direction: 'left' | 'right') => {
         const el = scrollRef.current;
@@ -69,16 +128,21 @@ export default function GaleriaPersonalizados({ ejemplos }: { ejemplos: Ejemplo[
             {ejemplos.map((ej, index) => (
                 <div
                     key={ej.id}
+                    data-index={index}
                     className="w-[calc(33.333%-0.7rem)] min-w-[180px] shrink-0 snap-start aspect-square bg-verde-claro rounded-xl overflow-hidden relative"
                 >
-                    <ImagenAmpliable 
-                        src={ej.imageUrl} 
-                        alt={ej.description} 
-                        sizes="(max-width: 640px) 33vw, 180px"
-                        images={allImages}
-                        currentIndex={index}
-                        priority={index < 3}
-                    />
+                    {visibleIndices.has(index) ? (
+                        <ImagenAmpliable 
+                            src={ej.imageUrl} 
+                            alt={ej.description} 
+                            sizes="(max-width: 640px) 25vw, 150px"
+                            images={allImages}
+                            currentIndex={index}
+                            priority={index < 3}
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-verde-claro animate-pulse" />
+                    )}
                 </div>
             ))}
         </div>

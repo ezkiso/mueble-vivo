@@ -33,7 +33,7 @@ const prisma = new PrismaClient();
 const COMPRADORES = [
   {
     customerName: 'David Larenas',
-    customerEmail: 'black.bowloficial@gmail.com',
+    customerEmail: 'Larenas.david@gmail.com',
     customerPhone: '+56931311618',
     totalAmount: 0, // opcional, solo informativo para el panel admin
   },
